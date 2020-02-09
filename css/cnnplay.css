@@ -1,0 +1,85 @@
+body {
+	background-color: black;
+	color: white;
+	font-family: "Calibri", "Helvetica", "Arial", sans-serif;
+	text-align: center;
+	overflow: scroll;
+}
+
+
+.divSteps {
+	position: fixed;
+	top: 50px;
+	left: 0px;
+	width: 100%;
+	text-align: center;
+}
+
+
+.divImages {
+	display: block;
+	position: fixed;
+	top: 80px;
+	left: 10px;
+	width: 100px;	
+	height: 100px;
+	text-align: center;	
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+
+.divNet {
+	display: none;
+	position: fixed;
+	top: 80px;
+	left: 10px;
+	width: 100px;	
+	height: 100px;
+	text-align: center;	
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+
+.divTrain {
+	display: none;
+	position: fixed;
+	top: 80px;
+	left: 10px;
+	width: 100px;	
+	height: 100px;
+	text-align: center;	
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+
+.divTest {
+	display: none;
+	position: fixed;
+	top: 80px;
+	left: 10px;
+	width: 100px;	
+	height: 100px;
+	text-align: center;	
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+
+.divEditLayer {
+	display: none;
+	z-index: 100;
+	position: fixed;
+	top: 100px;
+	width: 400px;
+	height: 500px;
+	text-align: center;
+	background-color: #333333;
+}
+
+.divGrey {
+	display: none;
+	z-index: 50;
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	background-color: rgba(0,0,0,0.5);
+}

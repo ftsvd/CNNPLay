@@ -1,0 +1,128 @@
+<!--
+	CNNPlay
+
+-->
+
+<!-- Include Kaparthy's ConvnetJS -->
+<script src="js/convnet-min.js"></script>
+<script src="js/cnnplay.js"></script>
+
+<html>
+
+<head>
+<link rel="stylesheet" href="css/cnnplay.css">
+</head>
+
+<body onLoad="start()">
+
+<!-- DIV for steps -->
+<div id="divSteps" class="divSteps">
+<a href="javascript:showTab('divImages')">Data</a> |
+<a href="javascript:showTab('divNet')">Neural Net</a> |
+<a href="javascript:showTab('divTrain')">Train</a> |
+<a href="javascript:showTab('divTest')">Test</a>
+
+</div>
+
+<!-- DIV to display images -->
+<div id="divImages" class="divImages">
+
+<table border=1 width=100%>
+	<tr>
+		<td valign=top align=center>
+			<b>Training Images:</b><br>
+			<span id="spantrainStatus">Getting...</span>
+			<hr size=1>
+			<span id="spantrain"></span>
+		</td>
+		<td valign=top align=center>
+			<b>Validation Images:</b><br>
+			<span id="spanvalStatus">Getting...</span>
+			<hr size=1>
+			<span id="spanval"></span>
+		</td>
+		<td valign=top align=center>
+			<b>Testing Images:</b><br>
+			<span id="spantestStatus">Getting...</span>
+			<hr size=1>
+			<span id="spantest"></span>
+		</td>
+	</tr>
+</table>
+</div>
+
+<div id="divNet" class="divNet">
+Load Network:
+<select id="selectPreConfigNet" onChange="loadPreConfigNet()">
+	<option value="new">New</option>
+	<option value="oneConv">Simple #1</option>
+	<option value="twoConv">Simple #2</option>
+	<option value="nestedOneConv">Nested #1</option>
+	<option value="nestedTwoConv">Nested #2</option>
+</select>
+<span id="spanNeuralNet"></span><br>
+<input type="button" value="Add Layer" onClick="drawNeuralNet('addLayer')">
+</div>
+
+<div id="divEditLayer" class="divEditLayer">
+<table width=100% height=100% border=1 cellpadding=5>
+	<tr height=50>
+		<td align=center>
+			Type: 
+			<select id="selectLayerType" onChange="displayLayerOptions()">
+				<option value=""></option>
+				<option value="fc">Fully Connected</option>
+				<option value="conv">Convolution</option>
+				<option value="pool">Pooling</option>
+			</select>
+		</td>
+	</tr>
+	<tr height=200>
+		<td align=center>
+			<img width=380 height=180>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<span id="spanEditLayerOptions"></span>
+		</td>
+	</tr>
+	<tr height=50>
+		<td align=center>
+			<span id="spanEditLayerConfirm"></span>
+			<input type="button" value="Cancel" onClick="hideEditLayer()">
+		</td>
+	</tr>
+</table>
+		
+</div>
+
+<div id="divTrain" class="divTrain">
+<table width=100% border=1 cellpadding=10>
+	<tr>
+		<td>
+			<canvas width=64 height=64 id="tempCanvas"></canvas>
+		</td>
+		<td>
+			Train using SGD: <br>
+			Train for: <input type="text" size=5 id="inputEpochs" value=10> epochs.<br>
+			Augmentation range (0 - 100): <input type="text" size=3 id="inputAugmentation" value=0>.<br>
+		</td>
+		<td width=100 align=center>
+			<input type="button" value="Train!" onClick="generateNetwork()">
+		</td>
+	</tr>
+</table>
+</div>
+
+<div id="divTest" class="divTest">
+</div>
+
+<!-- DIV to disable background elements -->
+<div id="divGrey" class="divGrey">
+</div>
+
+</body>
+
+</html>
+
