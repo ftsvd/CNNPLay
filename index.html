@@ -59,6 +59,7 @@ Load Network:
 	<option value="twoConv">Simple #2</option>
 	<option value="nestedOneConv">Nested #1</option>
 	<option value="nestedTwoConv">Nested #2</option>
+	<option value="USANOTAI">USANOTAI</option>
 </select>
 <span id="spanNeuralNet"></span><br>
 <input type="button" value="Add Layer" onClick="drawNeuralNet('addLayer')">
@@ -108,14 +109,26 @@ Load Network:
 			Train for: <input type="text" size=5 id="inputEpochs" value=10> epochs.<br>
 			Augmentation range (0 - 100): <input type="text" size=3 id="inputAugmentation" value=0>.<br>
 		</td>
-		<td width=100 align=center>
-			<input type="button" value="Train!" onClick="generateNetwork()">
+		<td width=100 valign=top align=center>
+			<input type="button" id="buttonGenNet" value="Generate Network!" onClick="generateNetwork()"><br>
+			<input type="button" id="buttonTrain" value="Train!" onClick="startTraining()">
+		</td>
+	</tr>
+	<tr>
+		<td colspan=2 valign=top align=center>
+			<span id="spanValResults"></span>
+		</td>
+		<td colspan=2 valign=top>
+			<span id="spanNetSummary"></span>
 		</td>
 	</tr>
 </table>
+
 </div>
 
 <div id="divTest" class="divTest">
+<input type="button" value="Test!" onClick="doTest()"><br><br>
+<span id="spanTestResults"></span>
 </div>
 
 <!-- DIV to disable background elements -->
