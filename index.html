@@ -1,6 +1,19 @@
 <!--
-	CNNPlay
+	CNNPlay - Interactive Web Browser-based Deep Learning
+	Copyright (c) 2020 Kim-Ann Git
+  
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <!-- Include Kaparthy's ConvnetJS -->
@@ -8,6 +21,8 @@
 <script src="js/cnnplay.js"></script>
 
 <html>
+<meta name="viewport" content="width=600">
+<!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
 
 <head>
 <link rel="stylesheet" href="css/cnnplay.css">
@@ -15,13 +30,60 @@
 
 <body onLoad="start()">
 
+<div id="divHeader" class="divHeader">
+<a href="index.html"><img src="img/cnnLogo.png" height=40></a>
+</div>
+
+<div id="divFooter" class="divFooter">
+<font size=-2>Copyright &copy 2020 Kim-Ann Git. All Rights Reserved.</font>
+</div>
+
 <!-- DIV for steps -->
 <div id="divSteps" class="divSteps">
-<a href="javascript:showTab('divImages')">Data</a> |
-<a href="javascript:showTab('divNet')">Neural Net</a> |
-<a href="javascript:showTab('divTrain')">Train</a> |
-<a href="javascript:showTab('divTest')">Test</a>
+<input type="button" value="INTRO" id="inputButtondivIntro" onClick="showTab('divIntro')" class="inputTab">
+<input type="button" value="DATA" id="inputButtondivImages" onClick="showTab('divImages')" class="inputTab">
+<input type="button" value="NET" id="inputButtondivNet" onClick="showTab('divNet')" class="inputTab">
+<input type="button" value="TRAIN" id="inputButtondivTrain" onClick="showTab('divTrain')" class="inputTab">
+<input type="button" value="TEST" id="inputButtondivTest" onClick="showTab('divTest')" class="inputTab">
+</div>
 
+<!-- DIV for introduction -->
+<div id="divIntro" class="divIntro">
+<center>
+<table width=500>
+	<tr>
+		<td>
+		<b>Introduction:</b><p>
+		CNNPlay allows you to explore and play with convolutional neural networks with the aim to classify
+		images into groups. CNNs have been the backbone of deep learning in medical imaging for the past few
+		years, and this application allows users without coding knowledge to build their own deep learning models.
+		<hr size=1>
+		<b>Instructions:</b><p>
+		<ol>
+			<li>Choose a demo set from the list below
+			<li>Visualize the images and labels in DATA
+			<li>Build a neural NET layer-by-layer
+				<ul>
+					<li>Choose a layer type
+					<li>Configure each layer individually
+					<li>(Pre-configured networks are available)
+				</ul>
+			<li>Generate the network
+			<li>TRAIN the model with different fitting methods and parameters
+			<li>TEST the model to see how well you did
+		</ol>
+		<hr size=1>
+		<b>Demo Sets:</b><p>
+		Demo Set 1: <a href="index.html?set=classCXRAXR">Differentiate CXRs and AXRs</a> (Easy)<br>
+		Demo Set 2: <a href="index.html?set=classICB">Detect ICB in Brain CTs</a> (Difficult)<br>
+		<hr size=1>
+		<b>More Information:</b><p>
+		Designed by <a href="mailto:ftsvd@yahoo.com">Kim-Ann Git</a>.<br>
+		This is a work in progress. More details to follow.
+		</td>
+	</tr>
+</table>
+</center>
 </div>
 
 <!-- DIV to display images -->
@@ -29,22 +91,27 @@
 
 <table border=1 width=100%>
 	<tr>
-		<td valign=top align=center>
+		<td valign=top align=center width=40%>
 			<b>Training Images:</b><br>
-			<span id="spantrainStatus">Getting...</span>
-			<hr size=1>
+			<span id="spantrainStatus">No Dataset.<br>Load one first.</span>
+		</td>
+		<td valign=top align=center width=20%>
+			<b>Validation Images:</b><br>
+			<span id="spanvalStatus">No Dataset.<br>Load one first.</span>
+		</td>
+		<td valign=top align=center width=40%>
+			<b>Testing Images:</b><br>
+			<span id="spantestStatus">No Dataset.<br>Load one first.</span>
+		</td>
+	</tr>
+	<tr>
+		<td valign=top align=center>
 			<span id="spantrain"></span>
 		</td>
 		<td valign=top align=center>
-			<b>Validation Images:</b><br>
-			<span id="spanvalStatus">Getting...</span>
-			<hr size=1>
 			<span id="spanval"></span>
 		</td>
 		<td valign=top align=center>
-			<b>Testing Images:</b><br>
-			<span id="spantestStatus">Getting...</span>
-			<hr size=1>
 			<span id="spantest"></span>
 		</td>
 	</tr>
@@ -52,17 +119,19 @@
 </div>
 
 <div id="divNet" class="divNet">
-Load Network:
+Load Preconfigured Network:
 <select id="selectPreConfigNet" onChange="loadPreConfigNet()">
 	<option value="new">New</option>
 	<option value="oneConv">Simple #1</option>
 	<option value="twoConv">Simple #2</option>
 	<option value="nestedOneConv">Nested #1</option>
 	<option value="nestedTwoConv">Nested #2</option>
-	<option value="USANOTAI">USANOTAI</option>
+	<option value="threeConv20">3 Conv 20 Filters</option>
+	<option value="threeConv20Plus">3 Conv 20 Filters Plus</option>
 </select>
 <span id="spanNeuralNet"></span><br>
-<input type="button" value="Add Layer" onClick="drawNeuralNet('addLayer')">
+<input type="button" id="inputButtonAddLayer" value="Add Layer" onClick="drawNeuralNet('addLayer')" class="inputButton"><br>
+<input type="button" id="inputButtonGenNet" value="Generate Network!" onClick="generateNetwork()" class="inputButton">
 </div>
 
 <div id="divEditLayer" class="divEditLayer">
@@ -71,7 +140,6 @@ Load Network:
 		<td align=center>
 			Type: 
 			<select id="selectLayerType" onChange="displayLayerOptions()">
-				<option value=""></option>
 				<option value="fc">Fully Connected</option>
 				<option value="conv">Convolution</option>
 				<option value="pool">Pooling</option>
@@ -80,7 +148,7 @@ Load Network:
 	</tr>
 	<tr height=200>
 		<td align=center>
-			<img width=380 height=180>
+			<img width=380 height=180 id="imageEditLayerTip">
 		</td>
 	</tr>
 	<tr>
@@ -95,7 +163,21 @@ Load Network:
 		</td>
 	</tr>
 </table>
-		
+</div>
+
+<div id="divViewLayer" class="divEditLayer">
+<table width=100% height=100% border=1 cellpadding=5>
+	<tr height=200>
+		<td align=center>
+			<img width=380 height=180 id="imageViewLayerTip">
+		</td>
+	</tr>
+	<tr height=50>
+		<td align=center>
+			<input type="button" value="OK" onClick="hideViewLayer()">
+		</td>
+	</tr>
+</table>
 </div>
 
 <div id="divTrain" class="divTrain">
@@ -105,13 +187,24 @@ Load Network:
 			<canvas width=64 height=64 id="tempCanvas"></canvas>
 		</td>
 		<td>
-			Train using SGD: <br>
-			Train for: <input type="text" size=5 id="inputEpochs" value=10> epochs.<br>
-			Augmentation range (0 - 100): <input type="text" size=3 id="inputAugmentation" value=0>.<br>
+			Train using:
+			<select id="selectTrainMethod">
+				<option value="SGD">SGD</option>
+				<option value="adagrad">Adagrad</option>
+				<option value="adadelta">Adadelta</option>
+			</select>  for: <input type="text" size=5 id="inputEpochs" value=10> epochs.
+			<hr size=1>
+			LR: <input type="text" size=6 id="inputTrainLR" value="0.00001"> |
+			Momentum <input type="text" size=3 id="inputTrainMomentum" value="0.9"> |
+			Batch Size <input type="text" size=2 id="inputTrainBatchSize" value="1"> |
+			l2_decay <input type="text" size=6 id="inputTrainL2Decay" value="0.0001">
+			<hr size=1>
+			Augmentation: <input type="checkbox" id="inputTrainAugFlip"> Horizontal Flip | Range (0.0 - 1.0): <input type="text" size=3 id="inputAugmentation" value="0.2">.<br>
 		</td>
-		<td width=100 valign=top align=center>
-			<input type="button" id="buttonGenNet" value="Generate Network!" onClick="generateNetwork()"><br>
-			<input type="button" id="buttonTrain" value="Train!" onClick="startTraining()">
+		<td width=100 valign=center align=center>
+			<input type="button" id="buttonTrain" value="Train!" onClick="startTraining()"><br><br>
+			Progress: <progress id="progressTrain" max=10></progress><br><br>
+			Time Taken: <span id="spanTimeTaken"></span>
 		</td>
 	</tr>
 	<tr>
@@ -127,12 +220,17 @@ Load Network:
 </div>
 
 <div id="divTest" class="divTest">
-<input type="button" value="Test!" onClick="doTest()"><br><br>
 <span id="spanTestResults"></span>
 </div>
 
 <!-- DIV to disable background elements -->
 <div id="divGrey" class="divGrey">
+</div>
+
+<div id="divBlank" class="divBlank">
+<center>
+<span style="background-color: red;"><h1>TRAINING IN PROGRESS... PLEASE WAIT...</h1></span>
+</center>
 </div>
 
 </body>
