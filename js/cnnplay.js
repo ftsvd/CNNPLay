@@ -47,8 +47,8 @@ var iconSize = 64;
 
 // Define starting neural network with 1 input and 1 output
 var layers = [];
-layers[0] = 'input,' + imageSize + ',' + imageSize + ',1'; 	// input layer, imageSize, imageSize, 1 channel
-layers[1] = 'softmax,2';		//output layer is softmax, 2 classifiers
+//layers[0] = 'input,' + imageSize + ',' + imageSize + ',1'; 	// input layer, imageSize, imageSize, 1 channel
+//layers[1] = 'softmax,' + labels.length;		//output layer is softmax, 2 classifiers
 
 // Global canvas context used to hold training image data
 var tempCTX; 
@@ -115,6 +115,10 @@ function loadLabels(whichDataFolder) {
 				var csvLine = csvArray[i].split(',');
 				labels[csvLine[0]] = csvLine[1];
 			}
+			
+			// Load labels.length into preconfig nets
+			preparePreConfigNets();
+			loadPreConfigNet('new')
 			
 			// Begin loading image data
 			startLoadData();
@@ -470,111 +474,113 @@ function displayLayerOptions() {
 // Load pre-configured neural net
 var preConfigNet = {};
 
-preConfigNet['new'] =
-	[ 	'input,' + imageSize + ',' + imageSize + ',1',
-		'softmax,2' ];	
+function preparePreConfigNets() {
+	preConfigNet['new'] =
+		[ 	'input,' + imageSize + ',' + imageSize + ',1',
+			'softmax,' + labels.length ];	
 
-preConfigNet['oneFC10'] =
-	[ 	'input,' + imageSize + ',' + imageSize + ',1',
-		'fc,10,relu',
-		'softmax,2' ];	
+	preConfigNet['oneFC10'] =
+		[ 	'input,' + imageSize + ',' + imageSize + ',1',
+			'fc,10,relu',
+			'softmax,' + labels.length ];	
 
-preConfigNet['twoFC10'] =
-	[ 	'input,' + imageSize + ',' + imageSize + ',1',
-		'fc,10,relu',
-		'fc,10,relu',
-		'softmax,2' ];	
-		
-preConfigNet['oneFC100'] =
-	[ 	'input,' + imageSize + ',' + imageSize + ',1',
-		'fc,100,relu',
-		'softmax,2' ];	
+	preConfigNet['twoFC10'] =
+		[ 	'input,' + imageSize + ',' + imageSize + ',1',
+			'fc,10,relu',
+			'fc,10,relu',
+			'softmax,' + labels.length ];	
+			
+	preConfigNet['oneFC100'] =
+		[ 	'input,' + imageSize + ',' + imageSize + ',1',
+			'fc,100,relu',
+			'softmax,' + labels.length ];	
 
-preConfigNet['twoFC100'] =
-	[ 	'input,' + imageSize + ',' + imageSize + ',1',
-		'fc,100,relu',
-		'fc,100,relu',
-		'softmax,2' ];	
+	preConfigNet['twoFC100'] =
+		[ 	'input,' + imageSize + ',' + imageSize + ',1',
+			'fc,100,relu',
+			'fc,100,relu',
+			'softmax,' + labels.length ];	
 
-preConfigNet['oneConv'] =
-	[ 	'input,' + imageSize + ',' + imageSize + ',1',
-		'conv,10,3,1,0,relu',
-		'pool,2,2',
-		'fc,10,relu',
-		'softmax,2' ];	
+	preConfigNet['oneConv'] =
+		[ 	'input,' + imageSize + ',' + imageSize + ',1',
+			'conv,10,3,1,1,relu',
+			'pool,2,2',
+			'fc,10,relu',
+			'softmax,' + labels.length ];	
 
-preConfigNet['twoConv'] =
-	[ 	'input,' + imageSize + ',' + imageSize + ',1',
-		'conv,10,3,1,0,relu',
-		'pool,2,2',
-		'conv,10,3,1,0,relu',
-		'pool,2,2',
-		'fc,10,relu',
-		'softmax,2' ];	
+	preConfigNet['twoConv'] =
+		[ 	'input,' + imageSize + ',' + imageSize + ',1',
+			'conv,10,3,1,1,relu',
+			'pool,2,2',
+			'conv,10,3,1,1,relu',
+			'pool,2,2',
+			'fc,10,relu',
+			'softmax,' + labels.length ];	
 
-preConfigNet['threeConv'] =
-	[ 	'input,' + imageSize + ',' + imageSize + ',1',
-		'conv,10,3,1,1,relu',
-		'pool,2,2',
-		'conv,10,3,1,1,relu',
-		'pool,2,2',
-		'conv,10,3,1,1,relu',
-		'pool,2,2',
-		'fc,10,relu',
-		'softmax,2' ];	
+	preConfigNet['threeConv'] =
+		[ 	'input,' + imageSize + ',' + imageSize + ',1',
+			'conv,10,3,1,1,relu',
+			'pool,2,2',
+			'conv,10,3,1,1,relu',
+			'pool,2,2',
+			'conv,10,3,1,1,relu',
+			'pool,2,2',
+			'fc,10,relu',
+			'softmax,' + labels.length ];	
 
-preConfigNet['nestedOneConv'] =
-	[ 	'input,' + imageSize + ',' + imageSize + ',1',
-		'conv,10,3,1,0,relu',
-		'conv,10,3,1,0,relu',
-		'pool,2,2',
-		'fc,10,relu',
-		'softmax,2' ];	
+	preConfigNet['nestedOneConv'] =
+		[ 	'input,' + imageSize + ',' + imageSize + ',1',
+			'conv,10,3,1,1,relu',
+			'conv,10,3,1,1,relu',
+			'pool,2,2',
+			'fc,10,relu',
+			'softmax,' + labels.length ];	
 
-preConfigNet['nestedTwoConv'] =
-	[ 	'input,' + imageSize + ',' + imageSize + ',1',
-		'conv,10,3,1,0,relu',
-		'conv,10,3,1,0,relu',
-		'pool,2,2',
-		'conv,10,3,1,0,relu',
-		'conv,10,3,1,0,relu',
-		'pool,2,2',
-		'fc,10,relu',
-		'softmax,2' ];	
-		
-preConfigNet['USANOTAI'] =
-	[ 	'input,' + imageSize + ',' + imageSize + ',1',
-		'conv,16,5,1,2,relu',
-		'pool,2,2',
-		'conv,20,5,1,2,relu',
-		'pool,2,2',
-		'conv,20,5,1,2,relu',
-		'pool,2,2',
-		'fc,10,relu',			
-		'softmax,2' ];	
+	preConfigNet['nestedTwoConv'] =
+		[ 	'input,' + imageSize + ',' + imageSize + ',1',
+			'conv,10,3,1,1,relu',
+			'conv,10,3,1,1,relu',
+			'pool,2,2',
+			'conv,10,3,1,1,relu',
+			'conv,10,3,1,1,relu',
+			'pool,2,2',
+			'fc,10,relu',
+			'softmax,' + labels.length ];	
+			
+	preConfigNet['USANOTAI'] =
+		[ 	'input,' + imageSize + ',' + imageSize + ',1',
+			'conv,16,5,1,2,relu',
+			'pool,2,2',
+			'conv,20,5,1,2,relu',
+			'pool,2,2',
+			'conv,20,5,1,2,relu',
+			'pool,2,2',
+			'fc,10,relu',			
+			'softmax,' + labels.length ];	
 
-preConfigNet['threeConv20'] =
-	[ 	'input,' + imageSize + ',' + imageSize + ',1',
-		'conv,20,3,1,2,relu',
-		'pool,2,2',
-		'conv,20,3,1,2,relu',
-		'pool,2,2',
-		'conv,20,3,1,2,relu',
-		'pool,2,2',
-		'fc,10,relu',			
-		'softmax,2' ];	
+	preConfigNet['threeConv20'] =
+		[ 	'input,' + imageSize + ',' + imageSize + ',1',
+			'conv,20,3,1,2,relu',
+			'pool,2,2',
+			'conv,20,3,1,2,relu',
+			'pool,2,2',
+			'conv,20,3,1,2,relu',
+			'pool,2,2',
+			'fc,10,relu',			
+			'softmax,' + labels.length ];	
 
-preConfigNet['threeConv20Plus'] =
-	[ 	'input,' + imageSize + ',' + imageSize + ',1',
-		'conv,20,3,1,2,relu',
-		'pool,2,2',
-		'conv,20,3,1,2,relu',
-		'pool,2,2',
-		'conv,20,3,1,2,relu',
-		'pool,2,2',
-		'fc,100,relu',			
-		'softmax,2' ];	
-
+	preConfigNet['threeConv20Plus'] =
+		[ 	'input,' + imageSize + ',' + imageSize + ',1',
+			'conv,20,3,1,2,relu',
+			'pool,2,2',
+			'conv,20,3,1,2,relu',
+			'pool,2,2',
+			'conv,20,3,1,2,relu',
+			'pool,2,2',
+			'fc,100,relu',			
+			'softmax,' + labels.length ];	
+}
+	
 function loadPreConfigNet(whichNet) {
 	whichNet = whichNet || document.getElementById('selectPreConfigNet').value;
 	layers = preConfigNet[whichNet];
@@ -588,6 +594,8 @@ function generateNetwork() {
 	// Kill and reintialize network
 	net = null;
 	net = new convnetjs.Net();
+	document.getElementById('spanValStats').innerHTML = 'Training Loss: ';
+	lowestLoss = (1/0);
 	
 	// Draw neural network summary
 	var spanNetSummaryHTML = '';
@@ -659,16 +667,41 @@ function generateNetwork() {
 var debugAugmentYes = 0;
 var debugAugmentNo = 0;
 
+function doStartTraining() {
+	// Block inputs
+	var b = 0;
+	function blockInputs() {
+		document.getElementById('divBlank').style.display = 'block';
+		if (b == 0) {
+			b++;
+			requestAnimationFrame(blockInputs);
+		} else {
+			startTraining();
+		}
+	}
+	requestAnimationFrame(blockInputs);
+}
+
+var trainForcedToStop = false;
+function forceStopTraining() {
+	trainForcedToStop = true;
+}
+
+// Variable to store best net encountered during training
+var bestNet;
+var lowestLoss = (1/0); // Infinity
+
 var networkTrained = false;
 function startTraining() {
+	
+	// Reset the flag to force stopping
+	trainForcedToStop = false;
 	
 	// Option to continue training, or reset network
 	if (networkTrained) {
 		
 	}
 
-	// Block inputs
-	document.getElementById('divBlank').style.display = 'block';	
 	
 	//TIMER: START
 	var then = new Date();
@@ -676,26 +709,20 @@ function startTraining() {
 	var epochs = document.getElementById('inputEpochs').value;
 
 	// Iterate through epochs
-	// https://stackoverflow.com/questions/30987218/update-progressbar-in-each-loop/31654481
-	// for (var e = 0; e < epochs; e++) {
 	var e = 1;
-	(function iterateEpochs() {
+	function iterateEpochs() {
 
 		var waitForMe = true;
 
 		// Iterate through images in training set
-		// https://stackoverflow.com/questions/30987218/update-progressbar-in-each-loop/31654481
+		var trainingLoss = 0;
 		for (var i = 0; i < trainSet.label.length; i++) {
-		// var i = 0;
-		// (function iterateImages() {
 
 			//Create new training volume at imageSizeximageSizex1, pre-filled with 0.0
 			var trainVol = new convnetjs.Vol(imageSize, imageSize, 1, 0.0);
 			
 			//Get dimensionless imagedata
 			var trainVolData = loadImageIntoVolume(trainSet.image[i]);
-
-			//Force repaint
 
 			//Fill training volume with dimensionless imagedata
 			var p = 0;
@@ -721,18 +748,17 @@ function startTraining() {
 				var trainer = new convnetjs.SGDTrainer(net, {method:selectTrainMethod, batch_size:inputTrainBatchSize, l2_decay:inputTrainL2Decay});
 			}
 			
-			trainer.train(trainVol, trainSet.label[i]); //train using matched trainVol and classifier
+			var stats = trainer.train(trainVol, trainSet.label[i]); //train using matched trainVol and classifier
+			
+			// Sum the losses
+			trainingLoss += stats.cost_loss + stats.l2_decay_loss;
 
 			if (i == (trainSet.label.length - 1)) {
 				waitForMe = false;
 			}
-
-		//	i++;
-		//	if (i < trainSet.label.length) {
-		//		setTimeout(iterateImages, 0);
-		//	}
-		// })();
 		}
+		// Get average of losses
+		trainingLoss = trainingLoss / trainSet.label.length;	
 		
 		// Do validation every Epoch
 
@@ -792,23 +818,36 @@ function startTraining() {
 			s.innerHTML += spanValResultsHTML;
 		}
 
-
 		e++;
-		if (e <= epochs && waitForMe == false) {
-			document.getElementById('progressTrain').value = parseInt((e / epochs) * 10);
-			// console.log(e);
-			//TIMER END:
-			if (e == epochs) {
-				var now = new Date();
-				console.log('Train time taken: ' + (now - then) + 'ms');
-				document.getElementById('spanTimeTaken').innerHTML = (now - then) + 'ms';
-				// Release inputs
-				document.getElementById('divBlank').style.display = 'none';	
+		if (e <= epochs && waitForMe == false && trainForcedToStop == false) {
+			document.getElementById('progressTrain').value = parseInt(((e-1) / epochs) * 10);
+			document.getElementById('spanValStats').innerHTML += trainingLoss.toFixed(2);
+			// Save best network
+			if (trainingLoss < lowestLoss) {
+				lowestLoss = trainingLoss;
+				bestNet = net.toJSON();
+				document.getElementById('spanValStats').innerHTML += '(!)';
 			}
-			setTimeout(iterateEpochs, 0);
-		}
-	})();
-	// }
+			document.getElementById('spanValStats').innerHTML += ', ';
+			// console.log(e, trainingLoss);
+			requestAnimationFrame(iterateEpochs);
+		} 
+		
+		if (e > epochs || trainForcedToStop == true) {
+			// Update progress bar to full if not forcibly stopped
+			if (trainForcedToStop == false) {
+				document.getElementById('progressTrain').value = 10;
+			}
+			//TIMER END:
+			var now = new Date();
+			console.log('Train time taken: ' + (now - then) + 'ms');
+			document.getElementById('spanTimeTaken').innerHTML = (now - then) + 'ms';
+			// Release inputs
+			document.getElementById('divBlank').style.display = 'none';	
+		}		
+		
+	}
+	requestAnimationFrame(iterateEpochs);
 
 	// Training finished - update status
 	networkTrained = true;
@@ -819,6 +858,7 @@ function startTraining() {
 
 
 }
+// var iterateEpochsFunction = (new startTraining()).iterateEpochs();
 
 var networkTested = false;
 function doTest() {
