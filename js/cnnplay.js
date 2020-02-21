@@ -64,6 +64,23 @@ function start() {
 	tempCTX = tempCanvas.getContext('2d');
 	
 	// Adjust elements
+	adjustElements()
+	
+	// showTab
+	showTab('divIntro');
+
+	// Load labels if get exists
+	if (getUrlVars()["set"]) {
+		showTab('divImages');
+		loadLabels(getUrlVars()["set"]);
+	}
+
+	// Draw default neural net
+	drawNeuralNet();
+}
+
+function adjustElements() {
+	// Adjust elements
 	// adjust tabs
 	for (var i = 0; i < divList.length; i++) {
 		document.getElementById(divList[i]).style.width = (window.innerWidth - 80) + 'px';
@@ -79,17 +96,12 @@ function start() {
 	document.getElementById('divEditLayer').style.left = ((window.innerWidth / 2) - 200) + 'px';
 	document.getElementById('divViewLayer').style.left = ((window.innerWidth / 2) - 200) + 'px';
 
-	// showTab
-	showTab('divIntro');
-
-	// Load labels if get exists
-	if (getUrlVars()["set"]) {
-		showTab('divImages');
-		loadLabels(getUrlVars()["set"]);
+	// adjust canvaswidth
+	if (window.innerWidth > 750) {
+		document.getElementById('canvasValStats').width = 500;
+	} else {
+		document.getElementById('canvasValStats').width = 300;		
 	}
-
-	// Draw default neural net
-	drawNeuralNet();
 }
 
 // load Labels
@@ -295,6 +307,12 @@ function drawNeuralNet(action, whichLayer) {
 	layersHTML += '<tr><td width=50></td><td width=300 align=center>Layer</td><td width=50></td></tr>';
 		
 	for (var i = 0; i < layers.length; i++) {
+		// Draws option to add layer when displaying last layer
+		if (i == (layers.length - 1)) {
+			layersHTML += '<tr><td colspan=3 align=center>';
+			layersHTML += '<input type="button" id="inputButtonAddLayer" value="Add Layer" onClick="drawNeuralNet(\'addLayer\')" class="inputButton">';
+			layersHTML += '</td></tr>';
+		}
 		// Draws layer
 		layersHTML += '<tr>';
 		layersHTML += '<td align=center>';
@@ -594,8 +612,14 @@ function generateNetwork() {
 	// Kill and reintialize network
 	net = null;
 	net = new convnetjs.Net();
-	document.getElementById('spanValStats').innerHTML = 'Training Loss: ';
+	document.getElementById('spanValStats').innerHTML = '';
 	lowestLoss = (1/0);
+	// Empty arrays to hold data to draw graph
+	valStatsX = [];
+	valStatsTrainAccuracy = [];
+	valStatsTrainingLoss = [];
+	valStatsValAccuracy = [];
+	valStatsValLoss = [];
 	
 	// Draw neural network summary
 	var spanNetSummaryHTML = '';
@@ -690,6 +714,12 @@ function forceStopTraining() {
 // Variable to store best net encountered during training
 var bestNet;
 var lowestLoss = (1/0); // Infinity
+// Arrays to hold data to draw graph
+var valStatsX = [];
+var valStatsTrainAccuracy = [];
+var valStatsTrainingLoss = [];
+var valStatsValAccuracy = [];
+var valStatsValLoss = [];
 
 var networkTrained = false;
 function startTraining() {
@@ -715,6 +745,7 @@ function startTraining() {
 		var waitForMe = true;
 
 		// Iterate through images in training set
+		var numberOfTrainCorrect = 0;
 		var trainingLoss = 0;
 		for (var i = 0; i < trainSet.label.length; i++) {
 
@@ -722,7 +753,7 @@ function startTraining() {
 			var trainVol = new convnetjs.Vol(imageSize, imageSize, 1, 0.0);
 			
 			//Get dimensionless imagedata
-			var trainVolData = loadImageIntoVolume(trainSet.image[i]);
+			var trainVolData = loadImageIntoVolume(trainSet.image[i], true);
 
 			//Fill training volume with dimensionless imagedata
 			var p = 0;
@@ -753,6 +784,22 @@ function startTraining() {
 			// Sum the losses
 			trainingLoss += stats.cost_loss + stats.l2_decay_loss;
 
+			// Predict training image
+			var prediction = net.forward(trainVol);
+			//pick the label with the highest score
+			var highestWeight = 0;
+			var highestWeightedLabel = null;
+			for (var o = 0; o < labels.length; o++) {
+				if (prediction.w[o] > highestWeight) {
+					highestWeight = prediction.w[o];
+					highestWeightedLabel = o;
+				}
+			}
+			if (highestWeightedLabel == trainSet.label[i]) {
+				// Count number of correct predictions
+				numberOfTrainCorrect++;
+			}
+
 			if (i == (trainSet.label.length - 1)) {
 				waitForMe = false;
 			}
@@ -766,6 +813,8 @@ function startTraining() {
 		document.getElementById('spanValResults').innerHTML = '';
 		
 		// Iterate through images in validation set
+		var numberOfValCorrect = 0;
+		var validationLoss = 0;
 		for (var i = 0; i < valSet.label.length; i++) {
 		
 			//PREDICT
@@ -773,7 +822,7 @@ function startTraining() {
 			var valVol = new convnetjs.Vol(imageSize, imageSize, 1, 0.0);
 
 			//Get dimensionless imagedata
-			var valVolData = loadImageIntoVolume(valSet.image[i]);
+			var valVolData = loadImageIntoVolume(valSet.image[i], false);
 
 			//fill testing volume with dimensionless imagedata of test volumes
 			var p = 0;
@@ -785,7 +834,6 @@ function startTraining() {
 			}
 
 			var prediction = net.forward(valVol);
-			
 			//pick the label with the highest score
 			var highestWeight = 0;
 			var highestWeightedLabel = null;
@@ -795,6 +843,17 @@ function startTraining() {
 					highestWeightedLabel = o;
 				}
 			}
+
+			// Get the validation losses
+			var tempNet = net;
+			if (selectTrainMethod == 'SGD') {
+				var trainer = new convnetjs.SGDTrainer(tempNet, {learning_rate:inputTrainLR, momentum:inputTrainMomentum, batch_size:inputTrainBatchSize, l2_decay:inputTrainL2Decay});
+			} else {
+				var trainer = new convnetjs.SGDTrainer(tempNet, {method:selectTrainMethod, batch_size:inputTrainBatchSize, l2_decay:inputTrainL2Decay});
+			}
+			var stats = trainer.train(trainVol, trainSet.label[i]); //train using matched trainVol and classifier
+			// Sum the losses
+			validationLoss += stats.cost_loss + stats.l2_decay_loss;
 			
 			// Output the predictions
 			// Create span to hold each individual result
@@ -808,6 +867,8 @@ function startTraining() {
 			if (highestWeightedLabel == valSet.label[i]) {
 				var predictionColor = '#ffffff';
 				s.style.borderColor = 'blue';
+				// Count number of correct predictions
+				numberOfValCorrect++;
 			} else {
 				var predictionColor = '#ff0000';
 				s.style.borderColor = 'red';
@@ -818,17 +879,41 @@ function startTraining() {
 			s.innerHTML += spanValResultsHTML;
 		}
 
+		validationLoss = validationLoss / valSet.label.length;
+
+		// Update graph
+		var valAccuracy = (numberOfValCorrect / valSet.label.length) * 100;
+		var trainAccuracy = (numberOfTrainCorrect / trainSet.label.length) * 100;
+		var graphCanvas = document.getElementById('canvasValStats');
+		valStatsX.push(valStatsX.length + 1); // Add 1 to the last epoch number
+		valStatsTrainAccuracy.push(trainAccuracy);
+		valStatsTrainingLoss.push(trainingLoss);
+		valStatsValAccuracy.push(valAccuracy);
+		valStatsValLoss.push(validationLoss);
+		drawLineGraph(graphCanvas, valStatsX, valStatsTrainAccuracy, 'Training Accuracy', true, true, true, 'green', false, '16px Calibri', 'black', 'white');
+		drawLineGraph(graphCanvas, valStatsX, valStatsTrainingLoss, 'Training Loss', true, false, false, 'yellow', false, '16px Calibri', 'black', 'white');
+		drawLineGraph(graphCanvas, valStatsX, valStatsValAccuracy, 'Val Accuracy', true, true, false, 'orange', false, '16px Calibri', 'black', 'white');
+		drawLineGraph(graphCanvas, valStatsX, valStatsValLoss, 'Val Loss', true, false, false, 'pink', false, '16px Calibri', 'black', 'white');
+		// Update text
+		document.getElementById('spanValStats').innerHTML = 'Train Accuracy: ' + trainAccuracy.toFixed(2) + '% | Training Loss: ' + trainingLoss.toFixed(2)  + '<br>Val Accuracy: ' + valAccuracy.toFixed(2) + '% | Validation Loss: ' + validationLoss.toFixed(2);
+		// Output training loss to console
+		console.log('Training Accuracy (' + (valStatsX.length) + '): ' + trainAccuracy.toFixed(2) + '%');
+		console.log('Training Loss (' + (valStatsX.length) + '): ' + trainingLoss.toFixed(2));
+		console.log('Val Accuracy (' + (valStatsX.length) + '): ' + valAccuracy.toFixed(2) + '%');
+		console.log('Val Loss (' + (valStatsX.length) + '): ' + validationLoss.toFixed(2));
+		// Save best network
+		if (validationLoss < lowestLoss) {
+			lowestLoss = validationLoss;
+			bestNet = net.toJSON();
+			console.log('Best Network Saved (Lowest Validation Loss)');
+		}
+
+		// Do next epoch
 		e++;
+
 		if (e <= epochs && waitForMe == false && trainForcedToStop == false) {
 			document.getElementById('progressTrain').value = parseInt(((e-1) / epochs) * 10);
-			document.getElementById('spanValStats').innerHTML += trainingLoss.toFixed(2);
-			// Save best network
-			if (trainingLoss < lowestLoss) {
-				lowestLoss = trainingLoss;
-				bestNet = net.toJSON();
-				document.getElementById('spanValStats').innerHTML += '(!)';
-			}
-			document.getElementById('spanValStats').innerHTML += ', ';
+			
 			// console.log(e, trainingLoss);
 			requestAnimationFrame(iterateEpochs);
 		} 
@@ -881,7 +966,7 @@ function doTest() {
 		var testVol = new convnetjs.Vol(imageSize, imageSize, 1, 0.0);
 
 		//Get dimensionless imagedata
-		var testVolData = loadImageIntoVolume(testSet.image[i]);
+		var testVolData = loadImageIntoVolume(testSet.image[i], false);
 
 		//fill testing volume with dimensionless imagedata of test volumes
 		var p = 0;
@@ -956,7 +1041,7 @@ function doTest() {
 
 // Return dimensionless imagedata from trainingImage
 // Load 1 training image, read imagedata.data, and return pixelvalue of red channel from each pixel
-function loadImageIntoVolume(trainingImage) {
+function loadImageIntoVolume(trainingImage, thisIsTrainingImage) {
 	tempCTX.drawImage(trainingImage, 0, 0);
 	var tempImageData = tempCTX.getImageData(0, 0, imageSize, imageSize);
 	var tempImageDataGray = [];
@@ -973,7 +1058,7 @@ function loadImageIntoVolume(trainingImage) {
 
 	var i = 0;
 	
-	if (augmentWithFlip && augmentRange > Math.random()) {
+	if (thisIsTrainingImage && augmentWithFlip && augmentRange > Math.random()) {
 		// Apply augmentation
 		debugAugmentYes++;
 		for (var y = 0; y < imageSize; y++) {
@@ -1041,6 +1126,115 @@ function getUrlVars() {
     return vars;
 }
 
+/***
+ * Simple Function to draw line graphs. Supports multiple series.
+ * Kim-Ann Git 20200221
+***/
+
+var lineGraphCount = 0;
+function drawLineGraph(whichCanvas, x, y, lineName, startAtZero, endAt100, forceRefresh, lineColor, showValue, fontStyle, backgroundColor, axesColor) {
+	
+	// Get canvas context from whichCanvas canvas element
+	var graphCTX = whichCanvas.getContext('2d');
+	var canvasPaddingX = 40;
+	var canvasPaddingY = 2;
+	var lineNameSpacing = 20;
+	var canvasWidth = whichCanvas.width - (canvasPaddingX * 4); // more space for lineName
+	var canvasHeight = whichCanvas.height - (canvasPaddingY * 2); 
+	
+	// Do analysis first
+	if (endAt100) {
+		var x_origin = 0;
+		var x_unit = canvasWidth / getMinMax(x)[1][0];
+		var y_origin = 0;
+		var y_unit = canvasHeight / 100;
+	} else
+	if (startAtZero) {
+		var x_origin = 0;
+		var x_unit = canvasWidth / getMinMax(x)[1][0];
+		var y_origin = 0;
+		var y_unit = canvasHeight / getMinMax(y)[1][0];
+	
+	} else {
+		var x_origin = getMinMax(x)[0][0];
+		var x_unit = canvasWidth / (getMinMax(x)[1][0] - getMinMax(x)[0][0]);
+		var y_origin = getMinMax(y)[0][0];
+		var y_unit = canvasHeight / (getMinMax(y)[1][0] - getMinMax(y)[0][0]);
+	}
+
+	// Empty graph first before drawing
+	if (forceRefresh) {
+		// Reset count to zero
+		lineGraphCount = 0;
+		// Set background color for the graph
+		whichCanvas.style.backgroundColor = backgroundColor;
+		// Reset transforms
+		graphCTX.setTransform(1, 0, 0, 1, 0, 0);
+		// Empty canvas
+		graphCTX.beginPath();
+		graphCTX.fillStyle = backgroundColor;
+		graphCTX.fillRect(0, 0, whichCanvas.width, whichCanvas.height);
+		graphCTX.stroke();
+		// Draw basic graph elements
+		graphCTX.beginPath();
+		// Allow padding do that pixels are visible at edges of graph
+		graphCTX.translate(canvasPaddingX, canvasPaddingY);
+		// Draw axes
+		graphCTX.strokeStyle = axesColor;
+		graphCTX.moveTo(-1, 0);
+		graphCTX.lineTo(-1, canvasHeight+1);
+		graphCTX.lineTo(canvasWidth+1, canvasHeight+1);
+		graphCTX.stroke();
+	}
+		
+	// Draw graph
+	graphCTX.beginPath();
+	
+	// Move to first point
+	graphCTX.strokeStyle = lineColor;
+	graphCTX.moveTo((x[0] - x_origin) * x_unit, (canvasHeight - (y[0] - y_origin) * y_unit));
+	graphCTX.font = fontStyle;
+	graphCTX.fillStyle = lineColor;
+	if (showValue) {
+		graphCTX.fillText(y[0].toFixed(2), (x[0] - x_origin) * x_unit, (canvasHeight - (y[0] - y_origin) * y_unit));
+	}
+	// Draw lineNames
+	graphCTX.fillText(lineName, canvasWidth+1, lineNameSpacing + (lineGraphCount * lineNameSpacing));
+		
+	// Draw line to second, ... last point
+	for (var i = 1; i < x.length; i++) {
+		graphCTX.lineTo((x[i] - x_origin) * x_unit, (canvasHeight - (y[i] - y_origin) * y_unit));
+		if (showValue) {
+			graphCTX.font = fontStyle;
+			graphCTX.fillStyle = lineColor;
+			graphCTX.fillText(y[i].toFixed(2), (x[i] - x_origin) * x_unit, (canvasHeight - (y[i] - y_origin) * y_unit));
+		}
+	}
+
+	graphCTX.stroke();
+	lineGraphCount++;
+	
+	function getMinMax(whichArray) {
+		// TODO: Catch error is whichArray is NOT array type
+
+		var minValue = (1/0);
+		var minIndex;
+		var maxValue = -(1/0);
+		var maxIndex;
+
+		for (var i = 0; i < whichArray.length; i++) {
+			if (whichArray[i] > maxValue && whichArray[i] != (1/0)) {
+				maxValue = whichArray[i];
+				maxIndex = i;
+			}
+			if (whichArray[i] < minValue) {
+				minValue = whichArray[i];
+				minIndex = i;
+			}
+		}
+		return [[minValue, minIndex], [maxValue, maxIndex]];
+	}
+}
 
 // Debug Parts
 

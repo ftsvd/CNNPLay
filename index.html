@@ -25,10 +25,11 @@
 <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
 
 <head>
+<title>CNNPlay</title>
 <link rel="stylesheet" href="css/cnnplay.css">
 </head>
 
-<body onLoad="start()">
+<body onLoad="start()" onresize="adjustElements()">
 
 <div id="divHeader" class="divHeader">
 <a href="index.html"><img src="img/cnnLogo.png" height=40></a>
@@ -131,7 +132,6 @@ Load Preconfigured Network:
 	<option value="threeConv20Plus">3 Conv 20 Filters Plus</option>
 </select>
 <span id="spanNeuralNet"></span><br>
-<input type="button" id="inputButtonAddLayer" value="Add Layer" onClick="drawNeuralNet('addLayer')" class="inputButton"><br>
 <input type="button" id="inputButtonGenNet" value="Generate Network!" onClick="generateNetwork()" class="inputButton">
 </div>
 
@@ -210,7 +210,8 @@ Load Preconfigured Network:
 	</tr>
 	<tr>
 		<td colspan=2 valign=top align=center>
-			<span id="spanValStats">Training Loss: </span><br>
+			<canvas id="canvasValStats" width=300% height=200></canvas><br>
+			<span id="spanValStats"></span><br>
 			<span id="spanValResults"></span>
 		</td>
 		<td colspan=2 valign=top>
@@ -231,8 +232,17 @@ Load Preconfigured Network:
 
 <div id="divBlank" class="divBlank">
 <center>
-<h1>TRAINING IN PROGRESS... PLEASE WAIT...</h1>
-<input type="button" value="Stop Training!" onClick="forceStopTraining()"></h1>
+<table border=1 cellpadding=7>
+	<tr>
+		<td bgcolor="black" align=center>
+			<font size=+3>TRAINING IN PROGRESS... PLEASE WAIT...</font><br>
+			<input type="button" value="Interrupt Training" onClick="forceStopTraining()"><b><br>
+			(Note: It may take some time to forcibly stop training.)
+		</td>
+	</tr>
+</table>
+
+
 </center>
 </div>
 
