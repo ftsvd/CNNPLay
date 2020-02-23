@@ -94,7 +94,7 @@ function adjustElements() {
 
 	// adjust divEdit and divView
 	document.getElementById('divEditLayer').style.left = ((window.innerWidth / 2) - 200) + 'px';
-	document.getElementById('divViewLayer').style.left = ((window.innerWidth / 2) - 200) + 'px';
+	document.getElementById('divViewTip').style.left = ((window.innerWidth / 2) - 200) + 'px';
 
 	// adjust canvaswidth
 	if (window.innerWidth > 750) {
@@ -373,12 +373,12 @@ function drawNeuralNet(action, whichLayer) {
 			if (i == 0) {
 			// Add option to display info for first layer
 				// layersHTML += '<input type="button" value="I" onClick="viewLayer(\'input\')">';
-				layersHTML += '<img src="img/icon_info.png" onClick="viewLayer(\'input\')">';
+				layersHTML += '<img src="img/icon_info.png" onClick="viewTip(\'layer_input\')">';
 			} else
 			if (i == layers.length - 1) {
 			// Add option to display info for last layer
 				// layersHTML += '<input type="button" value="I" onClick="viewLayer(\'output\')">';
-				layersHTML += '<img src="img/icon_info.png" onClick="viewLayer(\'output\')">';
+				layersHTML += '<img src="img/icon_info.png" onClick="viewTip(\'layer_output\')">';
 			} 
 				
 		layersHTML += '</td>';
@@ -430,13 +430,13 @@ function editLayer(whichLayer) {
 	document.getElementById('divGrey').style.display = 'block';	
 }
 
-function viewLayer(whichLayer) {
+function viewTip(whichTip) {
 
 	// Show correct tip
-	document.getElementById('imageViewLayerTip').src = 'img/tip_layer_' + whichLayer + '.png';
+	document.getElementById('imageViewTip').src = 'img/tip_' + whichTip + '.png';
 
 	// Show View Layer DIV
-	document.getElementById('divViewLayer').style.display = 'block';
+	document.getElementById('divViewTip').style.display = 'block';
 	document.getElementById('divGrey').style.display = 'block';	
 }
 
@@ -445,8 +445,8 @@ function hideEditLayer() {
 	document.getElementById('divGrey').style.display = 'none';	
 }
 
-function hideViewLayer() {
-	document.getElementById('divViewLayer').style.display = 'none';
+function hideViewTip() {
+	document.getElementById('divViewTip').style.display = 'none';
 	document.getElementById('divGrey').style.display = 'none';	
 }
 
